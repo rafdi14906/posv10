@@ -82,6 +82,14 @@ Route::post('/piutang/detail', ['as' => 'Simpan Pembayaran Piutang', 'uses' => '
 Route::get('/kas_harian', ['as' => 'Kas Harian', 'uses' => 'TrxKasHarianController@listKasHarian']);
 Route::post('/kas_harian', ['as' => 'Save Kas Harian', 'uses' => 'TrxKasHarianController@saveKasHarian']);
 
+Route::get('/laporan/arus-stok', ['as' => 'Laporan Arus Stok', 'uses' => 'LaporanController@arusStok']);
+Route::get('/laporan/hutang', ['as' => 'Laporan Hutang', 'uses' => 'LaporanController@hutang']);
+Route::get('/laporan/piutang', ['as' => 'Laporan Piutang', 'uses' => 'LaporanController@piutang']);
+Route::get('/laporan/penjualan/rangkuman', ['as' => 'Laporan Penjualan Rangkuman', 'uses' => 'LaporanController@penjualanRangkuman']);
+Route::get('/laporan/penjualan/per-customer', ['as' => 'Laporan Penjualan Per Customer', 'uses' => 'LaporanController@penjualanPerCustomer']);
+Route::get('/laporan/pembelian/rangkuman', ['as' => 'Laporan Pembelian Rangkuman', 'uses' => 'LaporanController@pembelianRangkuman']);
+Route::get('/laporan/pembelian/per-supplier', ['as' => 'Laporan Pembelian Per Supplier', 'uses' => 'LaporanController@pembelianPerSupplier']);
+
 Route::get('/setting', ['as' => 'Setting', 'uses' => 'SettingController@detailSetting']);
 Route::post('/setting', ['as' => 'Save Setting', 'uses' => 'SettingController@saveSetting']);
 

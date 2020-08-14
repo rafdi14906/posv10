@@ -18,6 +18,17 @@ class TrxHutangController extends Controller
     {
         $data['search'] = (isset($_GET['search']) ? $_GET['search'] : "");
         $data['listHutang'] = TrxPembelian::findAllHutang($data['search']);
+        foreach ($data['listHutang'] as $idx => $hutang) {
+            $data['listHutang'][$idx]['terbayar'] = 0;
+            $pembayaran = TrxPembayaran::findAllPembayaran('trx_pembelian_header', $hutang->pembelian_id);
+            if ($pembayaran != null) {
+                $terbayar = 0;
+                foreach ($pembayaran as $bayar) {
+                    $terbayar += $bayar->kredit;
+                }
+                $data['listHutang'][$idx]['terbayar'] = $data['listHutang'][$idx]['grandtotal'] - $terbayar;
+            }
+        }
 
         return view('trx_hutang.listhutang')->with($data);
     }

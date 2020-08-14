@@ -160,15 +160,10 @@ class TrxGudang extends Model
                 SUM( detail.stok_in ) AS masuk,
                 SUM( detail.stok_out ) AS keluar
             '))
-            ->where('tgl_transaksi', $request['tgl_transaksi'])
-            ->whereRaw('(nama_kategori LIKE "%' . $request['keyword'] . '%" OR kode_barang LIKE "%' . $request['keyword'] . '%" OR nama_barang LIKE "%' . $request['keyword'] . '%")')
+            ->whereBetween('tgl_transaksi', [$request['from'], $request['to']], 'and')
             ->orderBy('nama_kategori')
             ->orderBy('kode_barang')
+            ->groupBy('detail.barang_id')
             ->paginate(10);
-        // return TrxGudang::where('tgl_kas', $request['tgl_kas'])
-        //     ->whereRaw('(akun LIKE "%'.$request['keyword'].'%" OR reff LIKE "%'.$request['keyword'].'%")')
-        //     ->orderBy('tgl_kas')
-        //     ->orderBy('kas_harian_id')
-        //     ->paginate(10);
     }
 }

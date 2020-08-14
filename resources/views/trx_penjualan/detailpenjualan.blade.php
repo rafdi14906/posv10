@@ -115,8 +115,8 @@
                                                 <th class="column-title">No.</th>
                                                 <th class="column-title" width="10%">Kode Barang</th>
                                                 <th class="column-title">Nama Barang</th>
-                                                <th class="column-title" width="5%">Satuan</th>
-                                                <th class="column-title" width="5%" style="text-align: right;">Qty</th>
+                                                <th class="column-title">Satuan</th>
+                                                <th class="column-title" style="text-align: right;">Qty</th>
                                                 <th class="column-title" style="text-align: right;">Harga (Rp.)</th>
                                                 <th class="column-title" style="text-align: right;">Discount (Rp.)</th>
                                                 <th class="column-title" style="text-align: right;">Total (Rp.)</th>
@@ -239,8 +239,8 @@
                                         <th class="column-title">Kategori</th>
                                         <th class="column-title" width="10%">Kode Barang</th>
                                         <th class="column-title">Nama Barang</th>
-                                        <th class="column-title" width="5%">Satuan</th>
-                                        <th class="column-title" width="5%" style="text-align: right;">Stok</th>
+                                        <th class="column-title">Satuan</th>
+                                        <th class="column-title" style="text-align: right;">Stok</th>
                                         <th class="column-title" style="text-align: right;">Harga (Rp.)</th>
                                         <th class="column-title no-link last" style="text-align: center;">
                                             <span class="nobr">Action</span>
@@ -424,7 +424,7 @@
                     title: 'Oops...',
                     text: 'Qty harus diisi atau tidak boleh kurang dari atau sama dengan 0.',
                 })
-            } else if ($('#qty').val() > $('#limit_qty').val()) {
+            } else if (parseInt($('#qty').val()) > parseInt($('#limit_qty').val())) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',

@@ -109,4 +109,103 @@ class TrxPembelian extends Model
         $pembelian->status = 1;
         $pembelian->save();
     }
+
+    public static function findAllLaporanHutang($request)
+    {
+        return DB::table('trx_pembelian_header AS ph')
+            ->select('supp.nama_supplier', 'ph.grandtotal AS hutang', DB::raw(
+                '(SELECT
+                    SUM( b.kredit ) 
+                FROM
+                    trx_pembayaran b 
+                WHERE
+                    b.reff_id = ph.pembelian_id 
+                    AND b.reff_table = "trx_pembelian_header" 
+                GROUP BY
+                    b.reff_id) AS terbayar ' 
+            ))
+            ->join('mst_supplier AS supp', 'supp.supplier_id', '=', 'ph.supplier_id')
+            ->where('ph.status', 0)
+            ->whereBetween('ph.tgl_pembelian', [$request['from'], $request['to']])
+            ->orderBy('supp.nama_supplier')
+            ->paginate(10);
+    }
+
+    public static function findAllLaporanPembelianRangkuman($request)
+    {
+        return DB::table('trx_pembelian_header AS pmb')
+            ->select(
+                'pmb.tgl_pembelian',
+                'pmb.no_pembelian',
+                'supp.nama_supplier',
+                'pmb.subtotal',
+                'pmb.discount',
+                'pmb.ppn',
+                'pmb.grandtotal',
+                DB::raw(
+                    '(
+                        SELECT 
+                            SUM(byr.kredit)
+                        FROM 
+                            trx_pembayaran byr
+                        WHERE
+                            byr.reff_id = pmb.pembelian_id
+                            AND byr.reff_table = "trx_pembelian_header"
+                        GROUP BY
+                            byr.reff_id
+                    ) AS terbayar '
+                )
+            )
+            ->leftJoin('mst_supplier AS supp', 'supp.supplier_id', '=', 'pmb.supplier_id')
+            ->whereBetween('pmb.tgl_pembelian', [$request['from'], $request['to']])
+            ->orderBy('pmb.tgl_pembelian')
+            ->orderBy('pmb.no_pembelian')
+            ->orderBy('supp.nama_supplier')
+            ->paginate(10);
+    }
+
+    public static function findAllLaporanPembelianPerSupplierHeader($request)
+    {
+        return DB::table('trx_pembelian_header AS pmb')
+            ->select(
+                'pmb.supplier_id',
+                'supp.nama_supplier'
+            )
+            ->leftJoin('mst_supplier AS supp', 'supp.supplier_id', '=', 'pmb.supplier_id')
+            ->whereBetween('pmb.tgl_pembelian', [$request['from'], $request['to']])
+            ->orderBy('supp.nama_supplier')
+            ->groupBy('pmb.supplier_id')
+            ->paginate(10);
+    }
+
+    public static function findAllLaporanPembelianPerSupplierDetail($request)
+    {
+        return DB::table('trx_pembelian_header AS pmb')
+            ->select(
+                'pmb.tgl_pembelian',
+                'pmb.no_pembelian',
+                'pmb.subtotal',
+                'pmb.discount',
+                'pmb.ppn',
+                'pmb.grandtotal',
+                DB::raw(
+                    '(
+                        SELECT 
+                            SUM(byr.kredit)
+                        FROM 
+                            trx_pembayaran byr
+                        WHERE
+                            byr.reff_id = pmb.pembelian_id
+                            AND byr.reff_table = "trx_pembelian_header"
+                        GROUP BY
+                            byr.reff_id
+                    ) AS terbayar '
+                )
+            )
+            ->where('pmb.supplier_id', $request['supplier_id'])
+            ->whereBetween('pmb.tgl_pembelian', [$request['from'], $request['to']])
+            ->orderBy('pmb.tgl_pembelian')
+            ->orderBy('pmb.no_pembelian')
+            ->get();
+    }
 }

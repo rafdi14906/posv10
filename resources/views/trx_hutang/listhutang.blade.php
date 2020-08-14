@@ -82,7 +82,7 @@
                                             <td>{{ $hutang->no_pembelian }}</td>
                                             <td>{{ $hutang->nama_supplier }}</td>
                                             <td>{{ date('d/m/Y', strtotime($hutang->tgl_jatuh_tempo)) }}</td>
-                                            <td align="right">{{ number_format($hutang->grandtotal, 0, ".", ",") }}</td>
+                                            <td align="right">{{ number_format($hutang->terbayar, 0, ".", ",") }}</td>
                                             <td class=" last" align="center">
                                                 <button class="btn btn-primary btn-sm" onclick="sendRedirect(<?= $hutang->pembelian_id ?>)">
                                                     <span class="fa fa-plus"></span>

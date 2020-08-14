@@ -43,12 +43,21 @@
                 <ul class="nav side-menu">
                   <li><a><i class="fa fa-file-o"></i> Laporan <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
-                      <li><a href="{{ route('Master Barang') }}">Arus Stok</a></li>
-                      <li><a href="{{ route('Master Barang') }}">Hutang</a></li>
-                      <li><a href="{{ route('Master Customer') }}">Kas Harian</a></li>
-                      <li><a href="{{ route('Master Barang') }}">Penjualan</a></li>
-                      <li><a href="{{ route('Master Barang') }}">Pembelian</a></li>
-                      <li><a href="{{ route('Master Kategori') }}">Piutang</a></li>
+                      <li><a href="{{ route('Laporan Arus Stok') }}">Arus Stok</a></li>
+                      <li><a href="{{ route('Laporan Hutang') }}">Hutang</a></li>
+                      <li><a>Penjualan <span class="fa fa-chevron-down"></span></a>
+                        <ul class="nav child_menu">
+                          <li class="sub_menu"><a href="{{ route('Laporan Penjualan Rangkuman') }}">Rangkuman</a></li>
+                          <li class="sub_menu"><a href="{{ route('Laporan Penjualan Per Customer') }}">Per Customer</a></li>
+                        </ul>
+                      </li>
+                      <li><a>Pembelian <span class="fa fa-chevron-down"></span></a>
+                        <ul class="nav child_menu">
+                          <li class="sub_menu"><a href="{{ route('Laporan Pembelian Rangkuman') }}">Rangkuman</a></li>
+                          <li class="sub_menu"><a href="{{ route('Laporan Pembelian Per Supplier') }}">Per Supplier</a></li>
+                        </ul>
+                      </li>
+                      <li><a href="{{ route('Laporan Piutang') }}">Piutang</a></li>
                     </ul>
                   </li>
                 </ul>

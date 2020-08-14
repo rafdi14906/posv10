@@ -114,8 +114,8 @@
                                                 <th class="column-title">No.</th>
                                                 <th class="column-title" width="10%">Kode Barang</th>
                                                 <th class="column-title">Nama Barang</th>
-                                                <th class="column-title" width="5%">Satuan</th>
-                                                <th class="column-title" width="5%" style="text-align: right;">Qty</th>
+                                                <th class="column-title">Satuan</th>
+                                                <th class="column-title" style="text-align: right;">Qty</th>
                                                 <th class="column-title" style="text-align: right;">Harga (Rp.)</th>
                                                 <th class="column-title" style="text-align: right;">Discount (Rp.)</th>
                                                 <th class="column-title" style="text-align: right;">Total (Rp.)</th>
@@ -147,7 +147,7 @@
                                                     <input type="text" name="qty" id="qty" class="form-control" value="0" onkeyup="hitungTotal()" onclick="getFocus(this.id)">
                                                 </td>
                                                 <td>
-                                                    <input type="number" name="harga" id="harga" class="form-control" readonly value="0">
+                                                    <input type="number" name="harga" id="harga" class="form-control" value="0" onkeyup="hitungTotal()" onclick="getFocus(this.id)">
                                                 </td>
                                                 <td>
                                                     <input type="number" name="discount" id="discount" class="form-control" value="0" onkeyup="hitungTotal()" onclick="getFocus(this.id)">
@@ -214,7 +214,7 @@
                     $('#kode_barang').val(result['kode_barang']);
                     $('#nama_barang').val(result['nama_barang']);
                     $('#satuan').val(result['satuan']);
-                    $('#harga').val(result['harga']);
+                    // $('#harga').val(result['harga']);
                     $('#total').val($('#qty').val() * result['harga'] - $('#discount').val());
                 }
             });

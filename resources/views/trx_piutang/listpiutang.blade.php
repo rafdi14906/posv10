@@ -81,7 +81,7 @@
                                             <td>{{ $piutang->no_penjualan }}</td>
                                             <td>{{ $piutang->nama_customer }}</td>
                                             <td>{{ date('d/m/Y', strtotime($piutang->tgl_jatuh_tempo)) }}</td>
-                                            <td align="right">{{ number_format($piutang->grandtotal, 0, ".", ",") }}</td>
+                                            <td align="right">{{ number_format($piutang->terbayar, 0, ".", ",") }}</td>
                                             <td class=" last" align="center">
                                                 <button class="btn btn-primary btn-sm" onclick="sendRedirect(<?= $piutang->penjualan_id ?>)">
                                                     <span class="fa fa-plus"></span>

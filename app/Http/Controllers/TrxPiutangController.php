@@ -18,6 +18,17 @@ class TrxPiutangController extends Controller
     {
         $data['search'] = (isset($_GET['search']) ? $_GET['search'] : "");
         $data['listPiutang'] = TrxPenjualan::findAllPiutang($data['search']);
+        foreach ($data['listPiutang'] as $idx => $piutang) {
+            $data['listPiutang'][$idx]['terbayar'] = 0;
+            $pembayaran = TrxPembayaran::findAllPembayaran('trx_penjualan_header', $piutang->penjualan_id);
+            if ($pembayaran != null) {
+                $terbayar = 0;
+                foreach ($pembayaran as $bayar) {
+                    $terbayar += $bayar->debit;
+                }
+                $data['listPiutang'][$idx]['terbayar'] = $data['listPiutang'][$idx]['grandtotal'] - $terbayar;
+            }
+        }
 
         return view('trx_piutang.listpiutang')->with($data);
     }
@@ -27,7 +38,7 @@ class TrxPiutangController extends Controller
         $data['penjualan'] = TrxPenjualan::findOnePenjualan($penjualan_id);
         $data['listPembayaran'] = TrxPembayaran::findAllPembayaran('trx_penjualan_header', $penjualan_id);
         foreach ($data['listPembayaran'] as $key => $value) {
-            $data['penjualan']['terbayar'] += $value->kredit;
+            $data['penjualan']['terbayar'] += $value->debit;
         }
         $data['penjualan']['sisa_pembayaran'] = $data['penjualan']['grandtotal'] - $data['penjualan']['terbayar'];
 
