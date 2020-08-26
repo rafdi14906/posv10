@@ -23,6 +23,13 @@ class TrxGudangController extends Controller
         return view('trx_gudang.listgudang')->with($data);
     }
 
+    public function detailGudang($barang_id)
+    {
+        $data['listGudang'] = TrxGudang::findAllDetailGudang($barang_id);
+
+        return view('trx_gudang.detailgudang')->with($data);
+    }
+
     public function penyesuaianStok(Request $request)
     {
         try {

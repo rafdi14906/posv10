@@ -45,6 +45,7 @@
                     <ul class="nav child_menu">
                       <li><a href="{{ route('Laporan Arus Stok') }}">Arus Stok</a></li>
                       <li><a href="{{ route('Laporan Hutang') }}">Hutang</a></li>
+                      <li class="sub_menu"><a href="{{ route('Laporan Laba Rugi') }}">Laba Rugi</a></li>
                       <li><a>Penjualan <span class="fa fa-chevron-down"></span></a>
                         <ul class="nav child_menu">
                           <li class="sub_menu"><a href="{{ route('Laporan Penjualan Rangkuman') }}">Rangkuman</a></li>

@@ -53,7 +53,7 @@
                             <div class="col-md-10">
                                 <button class="btn btn-primary" onclick="showFormPenyesuaian()">
                                     <span class="fa fa-adjust" style="color: #ffffff"></span>
-                                    Penyesuaian
+                                    Penyesuaian Masuk
                                 </button>
                             </div>
                             <div class="col-md-2">
@@ -68,6 +68,14 @@
                             <div class="row" id="divPenyesuaian" style="display: none;">
                                 <div class="col-md-12" style="padding: 25px; border: 1px solid;">
                                     <h4>Form Penyesuaian</h4>
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            Tgl. Masuk *
+                                        </div>
+                                        <div class="col-md-10">
+                                            <input type="date" name="tgl_transaksi" id="tgl_transaksi" class="form-control" style="margin-bottom: 5px;" required>
+                                        </div>
+                                    </div>
                                     <div class="row" style="margin-bottom: 5px;">
                                         <div class="col-md-2">
                                             Barang *
@@ -88,7 +96,7 @@
                                         <div class="col-md-10">
                                             <select name="jenis_penyesuaian" id="jenis_penyesuaian" class="form-control" style="width: 100%; margin-bottom: 5px;" required>
                                                 <option value="masuk">Stok Masuk</option>
-                                                <option value="keluar">Stok Keluar</option>
+                                                <!-- <option value="keluar">Stok Keluar</option> -->
                                             </select>
                                         </div>
                                     </div>
@@ -97,7 +105,15 @@
                                             Jumlah *
                                         </div>
                                         <div class="col-md-10">
-                                            <input type="text" name="jumlah" id="jumlah" class="form-control" style="margin-bottom: 5px;" required>
+                                            <input type="number" name="jumlah" id="jumlah" class="form-control" style="margin-bottom: 5px;" required>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            Harga Pokok *
+                                        </div>
+                                        <div class="col-md-10">
+                                            <input type="number" name="harga_pokok" id="harga_pokok" class="form-control" style="margin-bottom: 5px;" required>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -110,7 +126,7 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-md-2">
-                                            
+
                                         </div>
                                         <div class="col-md-10">
                                             <button type="submit" class="btn btn-primary"><span class="fa fa-save"></span> Simpan </button>
@@ -129,6 +145,7 @@
                                         <th class="column-title">Kode Barang </th>
                                         <th class="column-title">Nama Barang </th>
                                         <th class="column-title no-link last" style="text-align: right;">Stok </th>
+                                        <th class="column-title no-link last" style="text-align: center;">Action </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -141,7 +158,12 @@
                                             <td>{{ $gudang->nama_kategori }}</td>
                                             <td>{{ $gudang->kode_barang }}</td>
                                             <td>{{ $gudang->nama_barang }}</td>
-                                            <td class=" last" align="right">{{ number_format($gudang->stok, 0, '.', ',')." ".$gudang->satuan }}</td>
+                                            <td align="right">{{ number_format($gudang->stok, 0, '.', ',')." ".$gudang->satuan }}</td>
+                                            <td class="last" align="center">
+                                                <a href="{{ route('Detail Gudang', $gudang->barang_id) }}" class="btn btn-info btn-sm">
+                                                    Detail
+                                                </a>
+                                            </td>
                                         </tr>
                                     <?php
                                         $no++;
@@ -150,7 +172,7 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td colspan="5">{{ $listGudang->links() }}</td>
+                                        <td colspan="6">{{ $listGudang->links() }}</td>
                                     </tr>
                                 </tfoot>
                             </table>

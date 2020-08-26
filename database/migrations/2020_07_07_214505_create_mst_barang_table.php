@@ -19,7 +19,7 @@ class CreateMstBarangTable extends Migration
             $table->string('kode_barang', 10)->unique();
             $table->string('nama_barang', 50);
             $table->string('satuan', 10);
-            $table->integer('harga');
+            $table->decimal('harga', 14, 2);
             $table->timestampsTz();
             $table->softDeletesTz();
             $table->index('barang_id');

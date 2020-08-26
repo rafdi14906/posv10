@@ -51,7 +51,7 @@
             </div>
             <div class="row">
               <div class="col-md-2">
-                <button class="btn btn-dark" data-toggle="modal" data-target=".modal-filter" onclick="">
+                <button class="btn btn-dark" data-toggle="modal" data-target=".modal-filter">
                   <span class="fa fa-filter"></span>
                   Filter
                 </button>
@@ -60,10 +60,10 @@
                 
               </div>
               <div class="col-md-2" align="right">
-                <button class="btn btn-info" onclick="">
+                <a href="{{ route('Print Laporan Arus Stok', 'print') }}?from={{ $search['from'] }}&to={{ $search['to'] }}" class="btn btn-info" target="_blank">
                   <span class="fa fa-print"></span>
                   Print
-                </button>
+                </a>
               </div>
             </div>
           </div>

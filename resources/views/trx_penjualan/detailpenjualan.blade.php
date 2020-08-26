@@ -444,21 +444,30 @@
                         nama_barang: $('#nama_barang').val(),
                         satuan: $('#satuan').val(),
                         qty: $('#qty').val(),
+                        limit_qty: $('#limit_qty').val(),
                         harga: $('#harga').val(),
                         discount: $('#discount').val(),
                         total: $('#total').val(),
                     },
                     success: function(result) {
-                        $('#barang_id').val("");
-                        $('#kode_barang').val("");
-                        $('#nama_barang').val("");
-                        $('#kode_nama_barang').val("");
-                        $('#qty').val(0);
-                        $('#limit_qty').val(0);
-                        $('#harga').val(0);
-                        $('#discount').val(0);
-                        $('#total').val(0);
-                        loadDetail();
+                        if (result['status'] == 0) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: result['message'],
+                            })
+                        } else {
+                            $('#barang_id').val("");
+                            $('#kode_barang').val("");
+                            $('#nama_barang').val("");
+                            $('#kode_nama_barang').val("");
+                            $('#qty').val(0);
+                            $('#limit_qty').val(0);
+                            $('#harga').val(0);
+                            $('#discount').val(0);
+                            $('#total').val(0);
+                            loadDetail();
+                        }
                     }
                 });
             }

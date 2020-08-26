@@ -18,9 +18,9 @@ class CreateTrxKasHarianTable extends Migration
             $table->date('tgl_kas');
             $table->string('akun');
             $table->string('reff')->nullable();
-            $table->double('debit');
-            $table->double('kredit');
-            $table->double('saldo');
+            $table->decimal('debit', 14, 2);
+            $table->decimal('kredit', 14, 2);
+            $table->decimal('saldo', 14, 2);
             $table->timestampsTz();
             $table->index('kas_harian_id');
             $table->index('reff');

@@ -60,10 +60,10 @@
 
               </div>
               <div class="col-md-2" align="right">
-                <button class="btn btn-info" onclick="">
+                <a href="{{ route('Print Laporan Hutang', 'print') }}?from={{ $search['from'] }}&to={{ $search['to'] }}" target="_blank" class="btn btn-info" onclick="">
                   <span class="fa fa-print"></span>
                   Print
-                </button>
+                </a>
               </div>
             </div>
           </div>

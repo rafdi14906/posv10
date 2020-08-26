@@ -69,6 +69,7 @@ Route::get('/penjualan/print/{id}', ['as' => 'Print Invoice Penjualan', 'uses' =
 Route::get('/penjualan/view/{id}', ['as' => 'View Penjualan', 'uses' => 'TrxPenjualanController@viewPenjualan']);
 
 Route::get('/gudang', ['as' => 'Gudang', 'uses' => 'TrxGudangController@listGudang']);
+Route::get('/gudang/detail/{id}', ['as' => 'Detail Gudang', 'uses' => 'TrxGudangController@detailGudang']);
 Route::post('/gudang/penyesuaian', ['as' => 'Penyesuaian Stok', 'uses' => 'TrxGudangController@penyesuaianStok']);
 
 Route::get('/hutang', ['as' => 'Hutang', 'uses' => 'TrxHutangController@listHutang']);
@@ -83,19 +84,21 @@ Route::get('/kas_harian', ['as' => 'Kas Harian', 'uses' => 'TrxKasHarianControll
 Route::post('/kas_harian', ['as' => 'Save Kas Harian', 'uses' => 'TrxKasHarianController@saveKasHarian']);
 
 Route::get('/laporan/arus-stok', ['as' => 'Laporan Arus Stok', 'uses' => 'LaporanController@arusStok']);
+Route::get('/laporan/arus-stok/{type}', ['as' => 'Print Laporan Arus Stok', 'uses' => 'LaporanController@printArusStok']);
 Route::get('/laporan/hutang', ['as' => 'Laporan Hutang', 'uses' => 'LaporanController@hutang']);
+Route::get('/laporan/hutang/{type}', ['as' => 'Print Laporan Hutang', 'uses' => 'LaporanController@printHutang']);
 Route::get('/laporan/piutang', ['as' => 'Laporan Piutang', 'uses' => 'LaporanController@piutang']);
+Route::get('/laporan/piutang/{type}', ['as' => 'Print Laporan Piutang', 'uses' => 'LaporanController@printPiutang']);
 Route::get('/laporan/penjualan/rangkuman', ['as' => 'Laporan Penjualan Rangkuman', 'uses' => 'LaporanController@penjualanRangkuman']);
+Route::get('/laporan/penjualan/rangkuman/{type}', ['as' => 'Print Laporan Penjualan Rangkuman', 'uses' => 'LaporanController@printPenjualanRangkuman']);
 Route::get('/laporan/penjualan/per-customer', ['as' => 'Laporan Penjualan Per Customer', 'uses' => 'LaporanController@penjualanPerCustomer']);
+Route::get('/laporan/penjualan/per-customer/{type}', ['as' => 'Print Laporan Penjualan Per Customer', 'uses' => 'LaporanController@printPenjualanPerCustomer']);
 Route::get('/laporan/pembelian/rangkuman', ['as' => 'Laporan Pembelian Rangkuman', 'uses' => 'LaporanController@pembelianRangkuman']);
+Route::get('/laporan/pembelian/rangkuman/{type}', ['as' => 'Print Laporan Pembelian Rangkuman', 'uses' => 'LaporanController@printPembelianRangkuman']);
 Route::get('/laporan/pembelian/per-supplier', ['as' => 'Laporan Pembelian Per Supplier', 'uses' => 'LaporanController@pembelianPerSupplier']);
+Route::get('/laporan/pembelian/per-supplier/{type}', ['as' => 'Print Laporan Pembelian Per Supplier', 'uses' => 'LaporanController@printPembelianPerSupplier']);
+Route::get('/laporan/keuangan/laba-rugi', ['as' => 'Laporan Laba Rugi', 'uses' => 'LaporanController@labaRugi']);
+Route::get('/laporan/keuangan/laba-rugi/{type}', ['as' => 'Print Laporan Laba Rugi', 'uses' => 'LaporanController@printLabaRugi']);
 
 Route::get('/setting', ['as' => 'Setting', 'uses' => 'SettingController@detailSetting']);
 Route::post('/setting', ['as' => 'Save Setting', 'uses' => 'SettingController@saveSetting']);
-
-/**
- * 
- * Dummy Data
- */
-Route::get('/barang/insertdummy', ['as' => 'Insert Dummy Barang', 'uses' => 'MstBarangController@insertDummy']);
-Route::get('/customer/insertdummy', ['as' => 'Insert Dummy Customer', 'uses' => 'MstCustomerController@insertDummy']);

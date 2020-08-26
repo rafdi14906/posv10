@@ -63,18 +63,48 @@ class TrxPenjualan extends Model
         }
 
 
-
         foreach ($request['listPenjualan'] as $detail) {
-            DB::table('trx_penjualan_detail')->insert([
-                'penjualan_id' => $penjualan_id,
-                'barang_id' => $detail['barang_id'],
-                'qty' => $detail['qty'],
-                'harga' => $detail['harga'],
-                'discount' => $detail['discount'],
-                'total' => $detail['total'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+
+            // ambil gudang id
+            // cari di tabel gudang yang barang id nya sama, dan ambil berdasarkan tanggal tertua
+            // while selama current qty belum habis / > 0
+            
+            while ($detail['qty'] > 0) {
+                $gudang = TrxGudang::findOldestByBarangId($detail['barang_id']);
+                $detail['gudang_id'] = $gudang->gudang_id;
+
+                if ($detail['qty'] <= $gudang->stok) {
+                    TrxGudang::saveBarangKeluar($detail, $request['tgl_penjualan']);
+                    DB::table('trx_penjualan_detail')->insert([
+                        'penjualan_id' => $penjualan_id,
+                        'gudang_id' => $gudang->gudang_id,
+                        'barang_id' => $detail['barang_id'],
+                        'qty' => $detail['qty'],
+                        'harga' => $detail['harga'],
+                        'discount' => $detail['discount'],
+                        'total' => $detail['qty'] * $detail['harga'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
+                    $detail['qty'] =- $detail['qty'];
+                } else if ($detail['qty'] > $gudang->stok) {
+                    TrxGudang::saveBarangKeluarHabis($detail, $request['tgl_penjualan']);
+                    DB::table('trx_penjualan_detail')->insert([
+                        'penjualan_id' => $penjualan_id,
+                        'gudang_id' => $gudang->gudang_id,
+                        'barang_id' => $detail['barang_id'],
+                        'qty' => $gudang['stok'],
+                        'harga' => $detail['harga'],
+                        'discount' => 0,
+                        'total' => $detail['stok'] * $detail['harga'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
+                    $detail['qty'] -= $gudang['stok'];
+                }
+            }
         }
 
         return $penjualan_id;
@@ -131,8 +161,7 @@ class TrxPenjualan extends Model
             ->join('mst_customer AS cust', 'cust.customer_id', '=', 'ph.customer_id')
             ->where('ph.status', 0)
             ->whereBetween('ph.tgl_penjualan', [$request['from'], $request['to']])
-            ->orderBy('cust.nama_customer')
-            ->paginate(10);
+            ->orderBy('cust.nama_customer');
     }
 
     public static function findAllLaporanPenjualanRangkuman($request)
@@ -164,8 +193,7 @@ class TrxPenjualan extends Model
             ->whereBetween('pnj.tgl_penjualan', [$request['from'], $request['to']])
             ->orderBy('pnj.tgl_penjualan')
             ->orderBy('pnj.no_penjualan')
-            ->orderBy('cust.nama_customer')
-            ->paginate(10);
+            ->orderBy('cust.nama_customer');
     }
 
     public static function findAllLaporanPenjualanPerCustomerHeader($request)
@@ -178,8 +206,7 @@ class TrxPenjualan extends Model
             ->leftJoin('mst_customer AS cust', 'cust.customer_id', '=', 'pnj.customer_id')
             ->whereBetween('pnj.tgl_penjualan', [$request['from'], $request['to']])
             ->orderBy('cust.nama_customer')
-            ->groupBy('pnj.customer_id')
-            ->paginate(10);
+            ->groupBy('pnj.customer_id');
     }
 
     public static function findAllLaporanPenjualanPerCustomerDetail($request)
@@ -210,6 +237,37 @@ class TrxPenjualan extends Model
             ->whereBetween('pnj.tgl_penjualan', [$request['from'], $request['to']])
             ->orderBy('pnj.tgl_penjualan')
             ->orderBy('pnj.no_penjualan')
+            ->get();
+    }
+
+    public static function findAllLaporanLabaRugiHeader($request)
+    {
+        return DB::table('mst_barang')
+            ->whereRaw('barang_id IN ( 
+                SELECT barang_id FROM trx_penjualan_detail d 
+                JOIN trx_penjualan_header h ON h.penjualan_id = d.penjualan_id
+                WHERE h.tgl_penjualan BETWEEN "'.$request['from'].'" AND "'.$request['to'].'" ) ')
+            ->orderBy('kode_barang')
+            ->groupBy('barang_id');
+    }
+
+    public static function findAllLaporanLabaRugiDetail($request)
+    {
+        return DB::table('trx_penjualan_detail AS pnjd')
+            ->select(
+                'pnjh.tgl_penjualan',
+                'pnjh.no_penjualan',
+                'brg.satuan',
+                'pnjd.qty',
+                'pnjd.total',
+                DB::raw('(SELECT gdg.harga_pokok * pnjd.qty FROM trx_gudang_header gdg WHERE gdg.gudang_id = pnjd.gudang_id) AS harga_pokok')
+            )
+            ->join('trx_penjualan_header AS pnjh', 'pnjh.penjualan_id', '=', 'pnjd.penjualan_id')
+            ->join('mst_barang AS brg', 'brg.barang_id', '=', 'pnjd.barang_id')
+            ->where('pnjd.barang_id', $request['barang_id'])
+            ->whereBetween('pnjh.tgl_penjualan', [$request['from'], $request['to']])
+            ->orderBy('pnjh.tgl_penjualan')
+            ->orderBy('pnjh.no_penjualan')
             ->get();
     }
 }

@@ -15,8 +15,10 @@ class CreateTrxGudangHeaderTable extends Migration
     {
         Schema::create('trx_gudang_header', function (Blueprint $table) {
             $table->bigIncrements('gudang_id');
+            $table->date('tgl_masuk');
             $table->integer('barang_id');
             $table->integer('stok');
+            $table->decimal('harga_pokok', 14, 2);
             $table->timestampsTz();
             $table->index('gudang_id');
             $table->index('barang_id');

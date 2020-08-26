@@ -112,7 +112,7 @@ class TrxPembelian extends Model
 
     public static function findAllLaporanHutang($request)
     {
-        return DB::table('trx_pembelian_header AS ph')
+        $query =  DB::table('trx_pembelian_header AS ph')
             ->select('supp.nama_supplier', 'ph.grandtotal AS hutang', DB::raw(
                 '(SELECT
                     SUM( b.kredit ) 
@@ -127,8 +127,9 @@ class TrxPembelian extends Model
             ->join('mst_supplier AS supp', 'supp.supplier_id', '=', 'ph.supplier_id')
             ->where('ph.status', 0)
             ->whereBetween('ph.tgl_pembelian', [$request['from'], $request['to']])
-            ->orderBy('supp.nama_supplier')
-            ->paginate(10);
+            ->orderBy('supp.nama_supplier');
+
+            return $query;
     }
 
     public static function findAllLaporanPembelianRangkuman($request)
@@ -160,8 +161,7 @@ class TrxPembelian extends Model
             ->whereBetween('pmb.tgl_pembelian', [$request['from'], $request['to']])
             ->orderBy('pmb.tgl_pembelian')
             ->orderBy('pmb.no_pembelian')
-            ->orderBy('supp.nama_supplier')
-            ->paginate(10);
+            ->orderBy('supp.nama_supplier');
     }
 
     public static function findAllLaporanPembelianPerSupplierHeader($request)
@@ -174,8 +174,7 @@ class TrxPembelian extends Model
             ->leftJoin('mst_supplier AS supp', 'supp.supplier_id', '=', 'pmb.supplier_id')
             ->whereBetween('pmb.tgl_pembelian', [$request['from'], $request['to']])
             ->orderBy('supp.nama_supplier')
-            ->groupBy('pmb.supplier_id')
-            ->paginate(10);
+            ->groupBy('pmb.supplier_id');
     }
 
     public static function findAllLaporanPembelianPerSupplierDetail($request)

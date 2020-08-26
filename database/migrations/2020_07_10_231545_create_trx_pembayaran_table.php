@@ -18,8 +18,8 @@ class CreateTrxPembayaranTable extends Migration
             $table->date('tgl_pembayaran');
             $table->string('reff_table');
             $table->integer('reff_id');
-            $table->integer('debit');
-            $table->integer('kredit');
+            $table->decimal('debit', 14, 2);
+            $table->decimal('kredit', 14, 2);
             $table->string('catatan')->nullable();
             $table->timestampsTz();
             $table->softDeletes();

@@ -18,9 +18,9 @@ class CreateTrxPembelianDetailTable extends Migration
             $table->integer('pembelian_id');
             $table->integer('barang_id');
             $table->integer('qty');
-            $table->double('harga');
-            $table->double('discount');
-            $table->double('total');
+            $table->decimal('harga', 14, 2);
+            $table->decimal('discount', 14, 2);
+            $table->decimal('total', 14, 2);
             $table->string('catatan')->nullable();
             $table->timestampsTz();
             $table->index('pembelian_detail_id');

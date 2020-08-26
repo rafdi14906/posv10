@@ -20,10 +20,10 @@ class CreateTrxPembelianHeaderTable extends Migration
             $table->string('no_pembelian', 50)->unique();
             $table->string('pembayaran');
             $table->date('tgl_jatuh_tempo')->nullable();
-            $table->double('subtotal');
-            $table->double('discount');
-            $table->double('ppn');
-            $table->double('grandtotal');
+            $table->decimal('subtotal', 14, 2);
+            $table->decimal('discount', 14, 2);
+            $table->decimal('ppn', 14, 2);
+            $table->decimal('grandtotal', 14, 2);
             $table->text('keterangan')->nullable();
             $table->tinyInteger('status');
             $table->timestampsTz();

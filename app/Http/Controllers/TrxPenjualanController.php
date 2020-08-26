@@ -45,17 +45,18 @@ class TrxPenjualanController extends Controller
         } else {
             foreach ($data as $stokBarang) {
                 $html .= '<tr>';
-                    $html .= '<td>' . $no . '</td>';
-                    $html .= '<td>' . $stokBarang->nama_kategori . '</td>';
-                    $html .= '<td>' . $stokBarang->kode_barang . '</td>';
-                    $html .= '<td>' . $stokBarang->nama_barang . '</td>';
-                    $html .= '<td align="center">' . $stokBarang->satuan . '</td>';
-                    $html .= '<td align="right">' . number_format($stokBarang->stok, 0, '.', ',') . '</td>';
-                    $html .= '<td align="right">' . number_format($stokBarang->harga, 2, '.', ',') . '</td>';
-                    $html .= '<td align="center">';
-                        $html .= '<button class="btn btn-primary btn-sm" onclick="validateStok('.$stokBarang->barang_id.', '.$stokBarang->stok.')"><span class="fa fa-plus"></span></button>';
-                    $html .= '</td>';
+                $html .= '<td>' . $no . '</td>';
+                $html .= '<td>' . $stokBarang->nama_kategori . '</td>';
+                $html .= '<td>' . $stokBarang->kode_barang . '</td>';
+                $html .= '<td>' . $stokBarang->nama_barang . '</td>';
+                $html .= '<td align="center">' . $stokBarang->satuan . '</td>';
+                $html .= '<td align="right">' . number_format($stokBarang->stok, 0, '.', ',') . '</td>';
+                $html .= '<td align="right">' . number_format($stokBarang->harga, 2, '.', ',') . '</td>';
+                $html .= '<td align="center">';
+                $html .= '<button class="btn btn-primary btn-sm" onclick="validateStok(' . $stokBarang->barang_id . ', ' . $stokBarang->stok . ')"><span class="fa fa-plus"></span></button>';
+                $html .= '</td>';
                 $html .= '</tr>';
+                $no++;
             }
         }
 
@@ -77,17 +78,17 @@ class TrxPenjualanController extends Controller
         } else {
             foreach ($data as $key => $row) {
                 $html .= '<tr>';
-                    $html .= '<td>' . $no . '</td>';
-                    $html .= '<td>' . $row['kode_barang'] . '</td>';
-                    $html .= '<td>' . $row['nama_barang'] . '</td>';
-                    $html .= '<td>' . $row['satuan'] . '</td>';
-                    $html .= '<td align="right">' . number_format($row['qty'], 0, ',', '.') . '</td>';
-                    $html .= '<td align="right">' . number_format($row['harga'], 2, '.', ',') . '</td>';
-                    $html .= '<td align="right">' . number_format($row['discount'], 2, '.', ',') . '</td>';
-                    $html .= '<td align="right">' . number_format($row['total'], 2, '.', ',') . '</td>';
-                    $html .= '<td>';
-                        $html .= '<button class="btn btn-danger btn-sm" onclick="deleteDetail('.$key.')"><span class="fa fa-trash"></span></button>';
-                    $html .= '</td>';
+                $html .= '<td>' . $no . '</td>';
+                $html .= '<td>' . $row['kode_barang'] . '</td>';
+                $html .= '<td>' . $row['nama_barang'] . '</td>';
+                $html .= '<td>' . $row['satuan'] . '</td>';
+                $html .= '<td align="right">' . number_format($row['qty'], 0, ',', '.') . '</td>';
+                $html .= '<td align="right">' . number_format($row['harga'], 2, '.', ',') . '</td>';
+                $html .= '<td align="right">' . number_format($row['discount'], 2, '.', ',') . '</td>';
+                $html .= '<td align="right">' . number_format($row['total'], 2, '.', ',') . '</td>';
+                $html .= '<td>';
+                $html .= '<button class="btn btn-danger btn-sm" onclick="deleteDetail(' . $key . ')"><span class="fa fa-trash"></span></button>';
+                $html .= '</td>';
                 $html .= '</tr>';
 
                 $no++;
@@ -99,29 +100,29 @@ class TrxPenjualanController extends Controller
             $grandtotal = $subtotal - $total_discount + $nilai_ppn;
 
             $html .= '<tr>';
-                $html .= '<td colspan="7" align="right">Sub Total</td>';
-                $html .= '<td align="right">' . number_format($subtotal, 2, '.', ',') . '</td>';
-                $html .= '<td></td>';
+            $html .= '<td colspan="7" align="right">Sub Total</td>';
+            $html .= '<td align="right">' . number_format($subtotal, 2, '.', ',') . '</td>';
+            $html .= '<td></td>';
             $html .= '</tr>';
             $html .= '<tr>';
-                $html .= '<td colspan="7" align="right">Total Diskon</td>';
-                $html .= '<td align="right">' . number_format($total_discount, 2, '.', ',') . '</td>';
-                $html .= '<td></td>';
+            $html .= '<td colspan="7" align="right">Total Diskon</td>';
+            $html .= '<td align="right">' . number_format($total_discount, 2, '.', ',') . '</td>';
+            $html .= '<td></td>';
             $html .= '</tr>';
             $html .= '<tr>';
-                $html .= '<td colspan="7" align="right">PPN ('.$request['ppn'].' %)</td>';
-                $html .= '<td align="right">' . number_format($nilai_ppn, 2, '.', ',') . '</td>';
-                $html .= '<td></td>';
+            $html .= '<td colspan="7" align="right">PPN (' . $request['ppn'] . ' %)</td>';
+            $html .= '<td align="right">' . number_format($nilai_ppn, 2, '.', ',') . '</td>';
+            $html .= '<td></td>';
             $html .= '</tr>';
             $html .= '<tr>';
-                $html .= '<td colspan="7" align="right">Grand Total</td>';
-                $html .= '<td align="right">' . number_format($grandtotal, 2, '.', ',') . '</td>';
-                $html .= '<td></td>';
+            $html .= '<td colspan="7" align="right">Grand Total</td>';
+            $html .= '<td align="right">' . number_format($grandtotal, 2, '.', ',') . '</td>';
+            $html .= '<td></td>';
             $html .= '</tr>';
-            $html .= '<input type="hidden" id="subtotal" value="'.$subtotal.'"/>';
-            $html .= '<input type="hidden" id="total_discount" value="'.$total_discount.'"/>';
-            $html .= '<input type="hidden" id="nilai_ppn" value="'.$nilai_ppn.'"/>';
-            $html .= '<input type="hidden" id="grandtotal" value="'.$grandtotal.'"/>';
+            $html .= '<input type="hidden" id="subtotal" value="' . $subtotal . '"/>';
+            $html .= '<input type="hidden" id="total_discount" value="' . $total_discount . '"/>';
+            $html .= '<input type="hidden" id="nilai_ppn" value="' . $nilai_ppn . '"/>';
+            $html .= '<input type="hidden" id="grandtotal" value="' . $grandtotal . '"/>';
         }
 
         return json_encode($html);
@@ -129,6 +130,7 @@ class TrxPenjualanController extends Controller
 
     public function saveDetailPenjualan(Request $request)
     {
+        $return = [];
         $listPenjualan = Session::get('listPenjualan');
 
         if ($listPenjualan == null) {
@@ -155,9 +157,15 @@ class TrxPenjualanController extends Controller
                     $listPenjualan[$key]['qty'] = $penjualan['qty'] + $request->qty;
                     $listPenjualan[$key]['total'] = $penjualan['total'] + $request->total;
 
-                break; // kalau sudah terpenuhi, langsung break agar key berikutnya tidak masuk ke dalam kondisi else.
+                    if ($listPenjualan[$key]['qty'] > $request->limit_qty) {
+                        $return['status'] = 0;
+                        $return['message'] = "Stok " . $request->nama_barang . " tidak cukup.";
+
+                        return json_encode($return);
+                    }
+                    break; // kalau sudah terpenuhi, langsung break agar key berikutnya tidak masuk ke dalam kondisi else.
                 } else {
-                    // apabila berbeda barang id nya makan masukkan saja langsung di index array yang berikutnya.
+                    // apabila berbeda barang id nya maka masukkan saja langsung di index array yang berikutnya.
                     $listPenjualan[$key + 1]['barang_id'] = $request->barang_id;
                     $listPenjualan[$key + 1]['kode_barang'] = $request->kode_barang;
                     $listPenjualan[$key + 1]['nama_barang'] = $request->nama_barang;
@@ -170,9 +178,11 @@ class TrxPenjualanController extends Controller
             }
             // dimasukkan kembali ke session
             Session::put('listPenjualan', $listPenjualan);
+
+            $return['status'] = 1;
         }
 
-        return json_encode(Session::get('listPenjualan'));
+        return json_encode($return);
     }
 
     public function deleteDetailPenjualan(Request $request)
@@ -192,7 +202,7 @@ class TrxPenjualanController extends Controller
         $param = $request->all();
         $param['tgl_penjualan'] = date("Y-m-d");
         $param['listPenjualan'] = Session::get('listPenjualan');
-        
+
         if ($param['listPenjualan'] == []) {
             $return['status'] = 0;
             $return['message'] = 'Silahkan tambahkan item terlebih dahulu.';
@@ -204,8 +214,7 @@ class TrxPenjualanController extends Controller
             DB::beginTransaction();
 
             $penjualan_id = TrxPenjualan::savePenjualan($param);
-            TrxGudang::saveBarangKeluar($param['listPenjualan'], $param['tgl_penjualan']);
-            
+
             if ($param['pembayaran'] == 'Cash') {
                 // untuk pembayaran cash, langsung dicatat pembayarannya.
                 // untuk tempo, ada halaman pembayaran tersendiri.
@@ -218,7 +227,7 @@ class TrxPenjualanController extends Controller
 
                 TrxPembayaran::savePembayaran($pembayaran);
 
-                $kas['tgl_kas'] = $param['tgl_penjualan']; 
+                $kas['tgl_kas'] = $param['tgl_penjualan'];
                 $kas['akun'] = 'Penerimaan pembayaran cash.';
                 $kas['reff'] = $param['no_penjualan'];
                 $kas['debit'] = $param['bayar'];
@@ -244,6 +253,7 @@ class TrxPenjualanController extends Controller
             $return['message'] = $th->getMessage();
 
             DB::rollBack();
+            // print_r($th);
             return json_encode($return);
         }
     }
