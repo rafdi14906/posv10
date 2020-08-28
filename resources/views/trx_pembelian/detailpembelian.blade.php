@@ -40,7 +40,7 @@
                                         Tgl. Pembelian *
                                     </div>
                                     <div class="col-md-8">
-                                        <input type="date" name="tgl_pembelian" id="tgl_pembelian" class="form-control" style="margin-bottom: 5px">
+                                        <input type="date" name="tgl_pembelian" id="tgl_pembelian" class="form-control" onchange="getNumbering(this.value)" style="margin-bottom: 5px">
                                     </div>
                                 </div>
                                 <div class="row">
@@ -48,7 +48,7 @@
                                         No. Pembelian *
                                     </div>
                                     <div class="col-md-8">
-                                        <input type="text" name="no_pembelian" id="no_pembelian" class="form-control" maxlength="20" style="margin-bottom: 5px">
+                                        <input type="text" name="no_pembelian" id="no_pembelian" class="form-control" maxlength="20" value="{{ $no_pembelian }}" readonly style="margin-bottom: 5px">
                                     </div>
                                 </div>
                                 <div class="row">
@@ -134,7 +134,7 @@
                                                     <select name="barang_id" id="barang_id" class="form-control select2" onchange="findOneBarang(this.value)">
                                                         <option></option>
                                                         @foreach($listBarang as $barang)
-                                                        <option value="{{ $barang->barang_id }}">{{ $barang->kode_barang." ".$barang->nama_barang }}</option>
+                                                        <option value="{{ $barang->barang_id }}">{{ $barang->nama_barang." (".$barang->kode_barang.")" }}</option>
                                                         @endforeach
                                                     </select>
                                                     <input type="hidden" id="kode_barang">
@@ -196,6 +196,23 @@
             } else {
                 $('#divTglJatuhTempo').show();
             }
+        }
+
+        function getNumbering(date) {
+            $.ajax({
+                dataType: 'JSON',
+                method: 'POST',
+                url: '{{ route("Get Numbering Pembelian") }}',
+                data: {
+                    date: date,
+                },
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(result) {
+                    $('#no_pembelian').val(result['numbering']);
+                }
+            });
         }
 
         function findOneBarang(barang_id) {

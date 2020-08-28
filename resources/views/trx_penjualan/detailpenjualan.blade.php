@@ -49,7 +49,7 @@
                                         No. Penjualan *
                                     </div>
                                     <div class="col-md-8">
-                                        <input type="text" name="no_penjualan" id="no_penjualan" class="form-control" maxlength="10" style="margin-bottom: 5px">
+                                        <input type="text" name="no_penjualan" id="no_penjualan" class="form-control" maxlength="10" value="{{ $no_penjualan }}" readonly style="margin-bottom: 5px">
                                     </div>
                                 </div>
                                 <div class="row">
@@ -407,6 +407,7 @@
                 success: function(result) {
                     $('#boxDetail').html(result);
                     $('#lbl_grandtotal').text($('#grandtotal').val().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                    hitungKembali();
                 }
             });
         }
@@ -450,6 +451,7 @@
                         total: $('#total').val(),
                     },
                     success: function(result) {
+                            console.log(result);
                         if (result['status'] == 0) {
                             Swal.fire({
                                 icon: 'error',

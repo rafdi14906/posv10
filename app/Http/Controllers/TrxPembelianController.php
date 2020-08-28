@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Helper;
 use App\Model\MstBarang;
 use App\Model\MstSupplier;
+use App\Model\Numbering;
 use App\Model\Setting;
 use App\Model\TrxGudang;
 use App\Model\TrxPembayaran;
@@ -32,7 +34,23 @@ class TrxPembelianController extends Controller
         $data['listSupplier'] = MstSupplier::listSupplier();
         $data['listBarang'] = MstBarang::listBarang();
 
+        $data['no_pembelian'] = '';
+
         return view('trx_pembelian.detailpembelian')->with($data);
+    }
+
+    public function getNumberingPembelian(Request $request)
+    {
+        $return = [];
+        try {
+            $prefix = 'PO/'.date('y/m', strtotime($request->date));
+            $return['status'] = 1;
+            $return['numbering'] = Helper::getNumbering($prefix);
+        } catch (\Throwable $th) {
+            $return['status'] = 0;
+            $return['message'] = $th->getMessage();
+        }
+        return json_encode($return);
     }
 
     public function saveDetailPembelian(Request $request)
@@ -57,24 +75,34 @@ class TrxPembelianController extends Controller
             Session::put('listPembelian', $pembelian);
         } else {
             // kalau sudah ada isi dari list pembelian
+            $status = 0;
+            $listKey = 0;
             foreach ($listPembelian as $key => $pembelian) {
                 if ($pembelian['barang_id'] == $request->barang_id) {
-                    // cek apabila barang id nya sama, maka qty dan total harganya dijumlahkan dengan nilai yang baru.
-                    $listPembelian[$key]['qty'] = $pembelian['qty'] + $request->qty;
-                    $listPembelian[$key]['total'] = $pembelian['total'] + $request->total;
+                    $status = 1; // status diubah menjadi 1 yang artinya barang id ketemu / ada dalam listpembelian
+                    $listKey = $key; // key ini akan digunakan untuk mencari data yang akan diupdate dalam listpembelian
 
-                break; // kalau sudah terpenuhi, langsung break agar key berikutnya tidak masuk ke dalam kondisi else.
-                } else {
-                    // apabila berbeda barang id nya makan masukkan saja langsung di index array yang berikutnya.
-                    $listPembelian[$key + 1]['barang_id'] = $request->barang_id;
-                    $listPembelian[$key + 1]['kode_barang'] = $request->kode_barang;
-                    $listPembelian[$key + 1]['nama_barang'] = $request->nama_barang;
-                    $listPembelian[$key + 1]['satuan'] = $request->satuan;
-                    $listPembelian[$key + 1]['qty'] = $request->qty;
-                    $listPembelian[$key + 1]['harga'] = $request->harga;
-                    $listPembelian[$key + 1]['discount'] = $request->discount;
-                    $listPembelian[$key + 1]['total'] = $request->total;
+                    break; // kalau sudah terpenuhi, langsung break agar key tidak terubah dengan key berikutnya.
                 }
+            }
+            
+            if ($status == 0) {
+                // apabila status 0, maka barang id ini tidak ditemukan dalam listpembelian, maka tambah baru ke dalam listpembelian
+                $newItem = [];
+                $newItem['barang_id'] = $request->barang_id;
+                $newItem['kode_barang'] = $request->kode_barang;
+                $newItem['nama_barang'] = $request->nama_barang;
+                $newItem['satuan'] = $request->satuan;
+                $newItem['qty'] = $request->qty;
+                $newItem['harga'] = $request->harga;
+                $newItem['discount'] = $request->discount;
+                $newItem['total'] = $request->total;
+                array_push($listPembelian, $newItem);
+            } else {
+                // apabila status 1, maka barang id ini ditemukan dalam listpembelian, selanjutnya update data
+                $listPembelian[$listKey]['qty'] = $listPembelian[$listKey]['qty'] + $request->qty;
+                $listPembelian[$listKey]['discount'] = $listPembelian[$listKey]['discount'] + $request->discount;
+                $listPembelian[$listKey]['total'] = $listPembelian[$listKey]['total'] + $request->total;
             }
             // dimasukkan kembali ke session
             Session::put('listPembelian', $listPembelian);
@@ -98,17 +126,17 @@ class TrxPembelianController extends Controller
         } else {
             foreach ($data as $key => $row) {
                 $html .= '<tr>';
-                    $html .= '<td>' . $no . '</td>';
-                    $html .= '<td>' . $row['kode_barang'] . '</td>';
-                    $html .= '<td>' . $row['nama_barang'] . '</td>';
-                    $html .= '<td>' . $row['satuan'] . '</td>';
-                    $html .= '<td align="right">' . number_format($row['qty'], 0, ',', '.') . '</td>';
-                    $html .= '<td align="right">' . number_format($row['harga'], 2, '.', ',') . '</td>';
-                    $html .= '<td align="right">' . number_format($row['discount'], 2, '.', ',') . '</td>';
-                    $html .= '<td align="right">' . number_format($row['total'], 2, '.', ',') . '</td>';
-                    $html .= '<td>';
-                        $html .= '<button class="btn btn-danger btn-sm" onclick="deleteDetail('.$key.')"><span class="fa fa-trash"></span></button>';
-                    $html .= '</td>';
+                $html .= '<td>' . $no . '</td>';
+                $html .= '<td>' . $row['kode_barang'] . '</td>';
+                $html .= '<td>' . $row['nama_barang'] . '</td>';
+                $html .= '<td>' . $row['satuan'] . '</td>';
+                $html .= '<td align="right">' . number_format($row['qty'], 0, ',', '.') . '</td>';
+                $html .= '<td align="right">' . number_format($row['harga'], 2, '.', ',') . '</td>';
+                $html .= '<td align="right">' . number_format($row['discount'], 2, '.', ',') . '</td>';
+                $html .= '<td align="right">' . number_format($row['total'], 2, '.', ',') . '</td>';
+                $html .= '<td>';
+                $html .= '<button class="btn btn-danger btn-sm" onclick="deleteDetail(' . $key . ')"><span class="fa fa-trash"></span></button>';
+                $html .= '</td>';
                 $html .= '</tr>';
 
                 $no++;
@@ -120,29 +148,29 @@ class TrxPembelianController extends Controller
             $grandtotal = $subtotal - $total_discount + $nilai_ppn;
 
             $html .= '<tr>';
-                $html .= '<td colspan="7" align="right">Sub Total</td>';
-                $html .= '<td align="right">' . number_format($subtotal, 2, '.', ',') . '</td>';
-                $html .= '<td></td>';
+            $html .= '<td colspan="7" align="right">Sub Total</td>';
+            $html .= '<td align="right">' . number_format($subtotal, 2, '.', ',') . '</td>';
+            $html .= '<td></td>';
             $html .= '</tr>';
             $html .= '<tr>';
-                $html .= '<td colspan="7" align="right">Total Diskon</td>';
-                $html .= '<td align="right">' . number_format($total_discount, 2, '.', ',') . '</td>';
-                $html .= '<td></td>';
+            $html .= '<td colspan="7" align="right">Total Diskon</td>';
+            $html .= '<td align="right">' . number_format($total_discount, 2, '.', ',') . '</td>';
+            $html .= '<td></td>';
             $html .= '</tr>';
             $html .= '<tr>';
-                $html .= '<td colspan="7" align="right">PPN ('.$request['ppn'].' %)</td>';
-                $html .= '<td align="right">' . number_format($nilai_ppn, 2, '.', ',') . '</td>';
-                $html .= '<td></td>';
+            $html .= '<td colspan="7" align="right">PPN (' . $request['ppn'] . ' %)</td>';
+            $html .= '<td align="right">' . number_format($nilai_ppn, 2, '.', ',') . '</td>';
+            $html .= '<td></td>';
             $html .= '</tr>';
             $html .= '<tr>';
-                $html .= '<td colspan="7" align="right">Grand Total</td>';
-                $html .= '<td align="right">' . number_format($grandtotal, 2, '.', ',') . '</td>';
-                $html .= '<td></td>';
+            $html .= '<td colspan="7" align="right">Grand Total</td>';
+            $html .= '<td align="right">' . number_format($grandtotal, 2, '.', ',') . '</td>';
+            $html .= '<td></td>';
             $html .= '</tr>';
-            $html .= '<input type="hidden" id="subtotal" value="'.$subtotal.'"/>';
-            $html .= '<input type="hidden" id="total_discount" value="'.$total_discount.'"/>';
-            $html .= '<input type="hidden" id="nilai_ppn" value="'.$nilai_ppn.'"/>';
-            $html .= '<input type="hidden" id="grandtotal" value="'.$grandtotal.'"/>';
+            $html .= '<input type="hidden" id="subtotal" value="' . $subtotal . '"/>';
+            $html .= '<input type="hidden" id="total_discount" value="' . $total_discount . '"/>';
+            $html .= '<input type="hidden" id="nilai_ppn" value="' . $nilai_ppn . '"/>';
+            $html .= '<input type="hidden" id="grandtotal" value="' . $grandtotal . '"/>';
         }
 
         return json_encode($html);
@@ -164,7 +192,7 @@ class TrxPembelianController extends Controller
 
         $param = $request->all();
         $param['listPembelian'] = Session::get('listPembelian');
-        
+
         if ($param['listPembelian'] == []) {
             $return['status'] = 0;
             $return['message'] = 'Silahkan tambahkan item terlebih dahulu.';
@@ -177,7 +205,12 @@ class TrxPembelianController extends Controller
 
             $pembelian_id = TrxPembelian::savePembelian($param);
             TrxGudang::saveBarangMasuk($param['listPembelian'], $param['tgl_pembelian']);
-            
+
+            $explode = explode('/', $param['no_pembelian']);
+            $prefix = $explode[0].'/'.$explode[1].'/'.$explode[2];
+            $lastNumber = $explode[3];
+            Numbering::saveNumbering($prefix, $lastNumber);
+
             if ($param['pembayaran'] == 'Cash') {
                 // untuk pembayaran cash, langsung dicatat pembayarannya.
                 // untuk tempo, ada halaman pembayaran tersendiri.

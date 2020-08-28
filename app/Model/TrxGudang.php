@@ -124,7 +124,7 @@ class TrxGudang extends Model
                 'barang_id' => $request['barang_id'],
                 'stok_in' => $request['jumlah'],
                 'stok_out' => 0,
-                'catatan' => $request['catatan'],
+                'catatan' => $request['catatan']." || Diinput oleh ".session('user.nama'),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -135,7 +135,7 @@ class TrxGudang extends Model
                 'barang_id' => $request['barang_id'],
                 'stok_in' => 0,
                 'stok_out' => $request['jumlah'],
-                'catatan' => $request['catatan'],
+                'catatan' => $request['catatan']." || Diinput oleh ".session('user.nama'),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

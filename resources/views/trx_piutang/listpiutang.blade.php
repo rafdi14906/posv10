@@ -80,7 +80,15 @@
                                             <td>{{ date('d/m/Y', strtotime($piutang->tgl_penjualan)) }}</td>
                                             <td>{{ $piutang->no_penjualan }}</td>
                                             <td>{{ $piutang->nama_customer }}</td>
-                                            <td>{{ date('d/m/Y', strtotime($piutang->tgl_jatuh_tempo)) }}</td>
+                                            <td class="
+                                                <?php
+                                                if ($piutang->tgl_jatuh_tempo < date('Y-m-d')) {
+                                                    echo 'bg-red';
+                                                } else if (date('Y-m-d', strtotime($piutang->tgl_jatuh_tempo. '-7 days')) < date('Y-m-d')) {
+                                                    echo 'bg-orange';
+                                                }
+                                                ?>
+                                            ">{{ date('d/m/Y', strtotime($piutang->tgl_jatuh_tempo)) }}</td>
                                             <td align="right">{{ number_format($piutang->terbayar, 0, ".", ",") }}</td>
                                             <td class=" last" align="center">
                                                 <button class="btn btn-primary btn-sm" onclick="sendRedirect(<?= $piutang->penjualan_id ?>)">

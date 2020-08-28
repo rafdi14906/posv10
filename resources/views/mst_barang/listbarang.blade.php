@@ -47,10 +47,12 @@
                         </div>
                         <div class="row">
                             <div class="col-md-10">
+                                @if(session('user.roles_id') == 1 || session('user.roles_id') == 2)
                                 <button class="btn btn-primary" onclick="sendRedirect('add');">
                                     <span class="fa fa-plus" style="color: #ffffff"></span>
                                     Tambah
                                 </button>
+                                @endif
                             </div>
                             <div class="col-md-2">
                                 <form id="formSearch" method="GET" action="{{ route('Master Barang') }}">
@@ -65,12 +67,15 @@
                                     <tr class="headings">
                                         <th class="column-title">No </th>
                                         <th class="column-title">Kategori </th>
+                                        <th class="column-title">Kode Barang </th>
                                         <th class="column-title">Nama Barang </th>
                                         <th class="column-title">Satuan </th>
-                                        <th class="column-title">Harga </th>
+                                        <th class="column-title" style="text-align: right;">Harga </th>
+                                        @if(session('user.roles_id') == 1 || session('user.roles_id') == 2)
                                         <th class="column-title no-link last">
                                             <span class="nobr">Action</span>
                                         </th>
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -81,9 +86,11 @@
                                         <tr>
                                             <td>{{ $no }}</td>
                                             <td>{{ $barang->nama_kategori }}</td>
+                                            <td>{{ $barang->kode_barang }}</td>
                                             <td>{{ $barang->nama_barang }}</td>
                                             <td>{{ $barang->satuan }}</td>
-                                            <td>{{ number_format($barang->harga, 0, ",", ".") }}</td>
+                                            <td align="right">{{ number_format($barang->harga, 0, ",", ".") }}</td>
+                                            @if(session('user.roles_id') == 1 || session('user.roles_id') == 2)
                                             <td class=" last">
                                                 <button class="btn btn-warning btn-sm" onclick="sendRedirect(<?= $barang->barang_id ?>)">
                                                     <span class="fa fa-edit"></span>
@@ -94,6 +101,7 @@
                                                     Delete
                                                 </button>
                                             </td>
+                                            @endif
                                         </tr>
                                     <?php
                                         $no++;
@@ -124,7 +132,7 @@
         }
 
         function deleteUser(barang_id, nama_barang) {
-            c = confirm("Anda yakin akan menghapus barang "+nama_barang+"?");
+            c = confirm("Anda yakin akan menghapus barang " + nama_barang + "?");
             if (c == true) {
                 window.location.href = "{{ route('Master Barang') }}/delete/" + barang_id;
             }

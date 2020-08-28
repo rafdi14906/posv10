@@ -87,7 +87,9 @@ class TrxPembelian extends Model
 
     public static function findAllDetailPembelian($pembelian_id)
     {
-        return DB::table('trx_pembelian_detail')->join('mst_barang', 'mst_barang.barang_id', '=', 'trx_pembelian_detail.barang_id')
+        return DB::table('trx_pembelian_detail')
+            ->select('trx_pembelian_detail.*', 'mst_barang.kode_barang', 'mst_barang.nama_barang', 'mst_barang.satuan')
+            ->join('mst_barang', 'mst_barang.barang_id', '=', 'trx_pembelian_detail.barang_id')
             ->where('trx_pembelian_detail.pembelian_id', $pembelian_id)
             ->get();
     }
@@ -206,5 +208,33 @@ class TrxPembelian extends Model
             ->orderBy('pmb.tgl_pembelian')
             ->orderBy('pmb.no_pembelian')
             ->get();
+    }
+
+    public static function chartPembelianPerBulan($date)
+    {
+        return DB::select("
+        SELECT
+            FROM_UNIXTIME( UNIX_TIMESTAMP( CONCAT( '".$date."-', n ) ), '%Y-%m-%d' ) AS Date,
+            COALESCE ( ( SELECT SUM( grandtotal ) FROM trx_pembelian_header WHERE tgl_pembelian = Date GROUP BY tgl_pembelian ), 0 ) AS total_pembelian
+        FROM
+            (
+            SELECT
+                ( ( ( b4.0 << 1 | b3.0 ) << 1 | b2.0 ) << 1 | b1.0 ) << 1 | b0.0 AS n 
+            FROM
+                ( SELECT 0 UNION ALL SELECT 1 ) AS b0,
+                ( SELECT 0 UNION ALL SELECT 1 ) AS b1,
+                ( SELECT 0 UNION ALL SELECT 1 ) AS b2,
+                ( SELECT 0 UNION ALL SELECT 1 ) AS b3,
+                ( SELECT 0 UNION ALL SELECT 1 ) AS b4 
+            ) t 
+        WHERE
+            n > 0 
+            AND n <= DAY ( last_day( '".$date."-01' ) )
+        ");
+    }
+
+    public static function totalPembelianPerBulan($date)
+    {
+        return TrxPembelian::where('tgl_pembelian', 'LIKE', $date.'%')->sum('grandtotal');
     }
 }

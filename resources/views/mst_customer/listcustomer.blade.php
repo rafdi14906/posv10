@@ -95,10 +95,12 @@
                           <span class="fa fa-edit"></span>
                           Edit
                         </button>
+                        @if (session('user.roles_id') == 1 || session('user.roles_id') == 2)
                         <button class="btn btn-danger btn-sm" onclick="deleteCustomer(<?= $customer->customer_id ?>, '<?= $customer->nama_customer ?>')">
                           <span class="fa fa-trash"></span>
                           Delete
                         </button>
+                        @endif
                       </td>
                     </tr>
                   <?php

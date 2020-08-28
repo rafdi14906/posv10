@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Helper;
 use App\Model\MstCustomer;
+use App\Model\Numbering;
 use App\Model\Setting;
 use App\Model\TrxGudang;
 use App\Model\TrxKasHarian;
@@ -31,6 +33,9 @@ class TrxPenjualanController extends Controller
     {
         $data['listCustomer'] = MstCustomer::listCustomer();
         // $data['listStokBarang'] = TrxGudang::listStokBarang();
+
+        $prefix = 'INV/'.date('y/m');
+        $data['no_penjualan'] = Helper::getNumbering($prefix);
 
         return view('trx_penjualan.detailpenjualan')->with($data);
     }
@@ -151,30 +156,41 @@ class TrxPenjualanController extends Controller
             Session::put('listPenjualan', $penjualan);
         } else {
             // kalau sudah ada isi dari list penjualan
+            $status = 0;
+            $listKey = 0;
             foreach ($listPenjualan as $key => $penjualan) {
                 if ($penjualan['barang_id'] == $request->barang_id) {
-                    // cek apabila barang id nya sama, maka qty dan total harganya dijumlahkan dengan nilai yang baru.
-                    $listPenjualan[$key]['qty'] = $penjualan['qty'] + $request->qty;
-                    $listPenjualan[$key]['total'] = $penjualan['total'] + $request->total;
+                    $status = 1; // status diubah menjadi 1 yang artinya barang id ketemu / ada dalam listpembelian
+                    $listKey = $key; // key ini akan digunakan untuk mencari data yang akan diupdate dalam listpembelian
 
                     if ($listPenjualan[$key]['qty'] > $request->limit_qty) {
+                        // apabila qty yang sudah ada di listpenjualan melebihi dari limit qty, maka gagal.
                         $return['status'] = 0;
                         $return['message'] = "Stok " . $request->nama_barang . " tidak cukup.";
 
                         return json_encode($return);
                     }
-                    break; // kalau sudah terpenuhi, langsung break agar key berikutnya tidak masuk ke dalam kondisi else.
-                } else {
-                    // apabila berbeda barang id nya maka masukkan saja langsung di index array yang berikutnya.
-                    $listPenjualan[$key + 1]['barang_id'] = $request->barang_id;
-                    $listPenjualan[$key + 1]['kode_barang'] = $request->kode_barang;
-                    $listPenjualan[$key + 1]['nama_barang'] = $request->nama_barang;
-                    $listPenjualan[$key + 1]['satuan'] = $request->satuan;
-                    $listPenjualan[$key + 1]['qty'] = $request->qty;
-                    $listPenjualan[$key + 1]['harga'] = $request->harga;
-                    $listPenjualan[$key + 1]['discount'] = $request->discount;
-                    $listPenjualan[$key + 1]['total'] = $request->total;
+                break; // kalau sudah terpenuhi, langsung break agar key tidak terubah dengan key berikutnya.
                 }
+            }
+
+            if ($status == 0) {
+                // apabila status 0, maka barang id ini tidak ditemukan dalam listPenjualan, maka tambah baru ke dalam listPenjualan
+                $newItem = [];
+                $newItem['barang_id'] = $request->barang_id;
+                $newItem['kode_barang'] = $request->kode_barang;
+                $newItem['nama_barang'] = $request->nama_barang;
+                $newItem['satuan'] = $request->satuan;
+                $newItem['qty'] = $request->qty;
+                $newItem['harga'] = $request->harga;
+                $newItem['discount'] = $request->discount;
+                $newItem['total'] = $request->total;
+                array_push($listPenjualan, $newItem);
+            } else {
+                // apabila status 1, maka barang id ini ditemukan dalam listPenjualan, selanjutnya update data
+                $listPenjualan[$listKey]['qty'] = $listPenjualan[$listKey]['qty'] + $request->qty;
+                $listPenjualan[$listKey]['discount'] = $listPenjualan[$listKey]['discount'] + $request->discount;
+                $listPenjualan[$listKey]['total'] = $listPenjualan[$listKey]['total'] + $request->total;
             }
             // dimasukkan kembali ke session
             Session::put('listPenjualan', $listPenjualan);
@@ -215,6 +231,11 @@ class TrxPenjualanController extends Controller
 
             $penjualan_id = TrxPenjualan::savePenjualan($param);
 
+            $explode = explode('/', $param['no_penjualan']);
+            $prefix = $explode[0].'/'.$explode[1].'/'.$explode[2];
+            $lastNumber = $explode[3];
+            Numbering::saveNumbering($prefix, $lastNumber);
+
             if ($param['pembayaran'] == 'Cash') {
                 // untuk pembayaran cash, langsung dicatat pembayarannya.
                 // untuk tempo, ada halaman pembayaran tersendiri.
@@ -253,7 +274,6 @@ class TrxPenjualanController extends Controller
             $return['message'] = $th->getMessage();
 
             DB::rollBack();
-            // print_r($th);
             return json_encode($return);
         }
     }

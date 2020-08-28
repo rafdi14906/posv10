@@ -48,6 +48,6 @@ class MstBarang extends Model
 
     public static function listBarang()
     {
-        return MstBarang::orderBy('mst_barang.kode_barang')->get();
+        return MstBarang::orderBy('mst_barang.nama_barang')->get();
     }
 }

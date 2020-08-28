@@ -68,11 +68,10 @@ class TrxPenjualan extends Model
             // ambil gudang id
             // cari di tabel gudang yang barang id nya sama, dan ambil berdasarkan tanggal tertua
             // while selama current qty belum habis / > 0
-            
+
             while ($detail['qty'] > 0) {
                 $gudang = TrxGudang::findOldestByBarangId($detail['barang_id']);
                 $detail['gudang_id'] = $gudang->gudang_id;
-
                 if ($detail['qty'] <= $gudang->stok) {
                     TrxGudang::saveBarangKeluar($detail, $request['tgl_penjualan']);
                     DB::table('trx_penjualan_detail')->insert([
@@ -87,22 +86,22 @@ class TrxPenjualan extends Model
                         'updated_at' => now(),
                     ]);
 
-                    $detail['qty'] =- $detail['qty'];
+                    $detail['qty'] -= $detail['qty'];
                 } else if ($detail['qty'] > $gudang->stok) {
                     TrxGudang::saveBarangKeluarHabis($detail, $request['tgl_penjualan']);
                     DB::table('trx_penjualan_detail')->insert([
                         'penjualan_id' => $penjualan_id,
                         'gudang_id' => $gudang->gudang_id,
                         'barang_id' => $detail['barang_id'],
-                        'qty' => $gudang['stok'],
+                        'qty' => $gudang->stok,
                         'harga' => $detail['harga'],
                         'discount' => 0,
-                        'total' => $detail['stok'] * $detail['harga'],
+                        'total' => $gudang->stok * $detail['harga'],
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
 
-                    $detail['qty'] -= $gudang['stok'];
+                    $detail['qty'] -= $gudang->stok;
                 }
             }
         }
@@ -121,7 +120,9 @@ class TrxPenjualan extends Model
 
     public static function findAllDetailPenjualan($penjualan_id)
     {
-        return DB::table('trx_penjualan_detail')->join('mst_barang', 'mst_barang.barang_id', '=', 'trx_penjualan_detail.barang_id')
+        return DB::table('trx_penjualan_detail')
+            ->select('trx_penjualan_detail.*', 'mst_barang.kode_barang', 'mst_barang.nama_barang', 'mst_barang.satuan')
+            ->join('mst_barang', 'mst_barang.barang_id', '=', 'trx_penjualan_detail.barang_id')
             ->where('trx_penjualan_detail.penjualan_id', $penjualan_id)
             ->get();
     }
@@ -246,7 +247,7 @@ class TrxPenjualan extends Model
             ->whereRaw('barang_id IN ( 
                 SELECT barang_id FROM trx_penjualan_detail d 
                 JOIN trx_penjualan_header h ON h.penjualan_id = d.penjualan_id
-                WHERE h.tgl_penjualan BETWEEN "'.$request['from'].'" AND "'.$request['to'].'" ) ')
+                WHERE h.tgl_penjualan BETWEEN "' . $request['from'] . '" AND "' . $request['to'] . '" ) ')
             ->orderBy('kode_barang')
             ->groupBy('barang_id');
     }
@@ -268,6 +269,103 @@ class TrxPenjualan extends Model
             ->whereBetween('pnjh.tgl_penjualan', [$request['from'], $request['to']])
             ->orderBy('pnjh.tgl_penjualan')
             ->orderBy('pnjh.no_penjualan')
+            ->get();
+    }
+
+    public static function chartPenjualanPerBulan($date)
+    {
+        return DB::select("
+        SELECT
+            FROM_UNIXTIME( UNIX_TIMESTAMP( CONCAT( '" . $date . "-', n ) ), '%Y-%m-%d' ) AS Date,
+            COALESCE ( ( SELECT COUNT( * ) jumlah_trx FROM trx_penjualan_header WHERE tgl_penjualan = Date GROUP BY tgl_penjualan ), 0 ) AS total_trx
+        FROM
+            (
+            SELECT
+                ( ( ( b4.0 << 1 | b3.0 ) << 1 | b2.0 ) << 1 | b1.0 ) << 1 | b0.0 AS n 
+            FROM
+                ( SELECT 0 UNION ALL SELECT 1 ) AS b0,
+                ( SELECT 0 UNION ALL SELECT 1 ) AS b1,
+                ( SELECT 0 UNION ALL SELECT 1 ) AS b2,
+                ( SELECT 0 UNION ALL SELECT 1 ) AS b3,
+                ( SELECT 0 UNION ALL SELECT 1 ) AS b4 
+            ) t 
+        WHERE
+            n > 0 
+            AND n <= DAY ( last_day( '" . $date . "-01' ) )
+        ");
+    }
+
+    public static function chartRevenuePerBulan($date)
+    {
+        return DB::select("
+        SELECT
+            FROM_UNIXTIME( UNIX_TIMESTAMP( CONCAT( '" . $date . "-', n ) ), '%Y-%m-%d' ) AS Date,
+            COALESCE ( ( SELECT SUM( grandtotal ) FROM trx_penjualan_header WHERE tgl_penjualan = Date GROUP BY tgl_penjualan ), 0 ) AS total_revenue
+        FROM
+            (
+            SELECT
+                ( ( ( b4.0 << 1 | b3.0 ) << 1 | b2.0 ) << 1 | b1.0 ) << 1 | b0.0 AS n 
+            FROM
+                ( SELECT 0 UNION ALL SELECT 1 ) AS b0,
+                ( SELECT 0 UNION ALL SELECT 1 ) AS b1,
+                ( SELECT 0 UNION ALL SELECT 1 ) AS b2,
+                ( SELECT 0 UNION ALL SELECT 1 ) AS b3,
+                ( SELECT 0 UNION ALL SELECT 1 ) AS b4 
+            ) t 
+        WHERE
+            n > 0 
+            AND n <= DAY ( last_day( '" . $date . "-01' ) )
+        ");
+    }
+
+    public static function totalPenjualanPerBulan($date)
+    {
+        return TrxPenjualan::where('tgl_penjualan', 'LIKE', $date . '%')->sum('grandtotal');
+    }
+
+    public static function chartLabaPerBulan($date)
+    {
+        return DB::select("
+        SELECT
+            FROM_UNIXTIME( UNIX_TIMESTAMP( CONCAT( '" . $date . "-', n ) ), '%Y-%m-%d' ) AS Date,
+            COALESCE (
+                (
+                SELECT
+                    SUM( pnjd.total ) - SUM( ( SELECT gdg.harga_pokok * pnjd.qty FROM trx_gudang_header gdg WHERE gdg.gudang_id = pnjd.gudang_id ) ) 
+                FROM
+                    trx_penjualan_detail pnjd
+                    JOIN trx_penjualan_header pnjh ON pnjh.penjualan_id = pnjd.penjualan_id 
+                WHERE
+                    pnjh.tgl_penjualan = Date 
+                GROUP BY
+                    pnjh.tgl_penjualan 
+                ),
+                0 
+            ) AS total_laba 
+        FROM
+            (
+            SELECT
+                ( ( ( b4.0 << 1 | b3.0 ) << 1 | b2.0 ) << 1 | b1.0 ) << 1 | b0.0 AS n 
+            FROM
+                ( SELECT 0 UNION ALL SELECT 1 ) AS b0,
+                ( SELECT 0 UNION ALL SELECT 1 ) AS b1,
+                ( SELECT 0 UNION ALL SELECT 1 ) AS b2,
+                ( SELECT 0 UNION ALL SELECT 1 ) AS b3,
+                ( SELECT 0 UNION ALL SELECT 1 ) AS b4 
+            ) t 
+        WHERE
+            n > 0 
+            AND n <= DAY ( last_day( '" . $date . "-01' ) )
+        ");
+    }
+
+    public static function totalLabaPerBulan($date)
+    {
+        return DB::table('trx_penjualan_detail AS pnjd')
+            ->select(DB::raw('SUM( pnjd.total ) - SUM( ( SELECT gdg.harga_pokok * pnjd.qty FROM trx_gudang_header gdg WHERE gdg.gudang_id = pnjd.gudang_id ) ) total_laba '))
+            ->join('trx_penjualan_header AS pnjh', 'pnjh.penjualan_id', '=', 'pnjd.penjualan_id')
+            ->where('pnjh.tgl_penjualan', 'LIKE', $date . '%')
+            ->groupBy('pnjh.tgl_penjualan')
             ->get();
     }
 }
